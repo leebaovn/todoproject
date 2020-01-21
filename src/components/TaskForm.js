@@ -4,8 +4,36 @@ class TaskForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            id: '',
             name: '',
             status: false
+        }
+    }
+
+    UNSAFE_componentWillMount(){
+        if(this.props.task){
+            var {id, name, status} = this.props.task;
+            this.setState({
+                id: id,
+                name: name,
+                status: status
+            })
+        }
+    }
+
+    UNSAFE_componentWillReceiveProps(nextProps){
+        if(nextProps && nextProps.task){
+            this.setState({
+                id: nextProps.task.id,
+                name: nextProps.task.name,
+                status: nextProps.task.status
+            })
+        }else if(!nextProps.task){
+            this.setState({
+                id:'',
+                name:'',
+                editingTask:null
+            })
         }
     }
     onCloseForm = () => {
@@ -22,12 +50,14 @@ class TaskForm extends Component {
         this.setState({
             [name]: value
         });
+        
     }
     onSubmit = (event) => {
         event.preventDefault();
         this.props.onSubmit(this.state);
     }
     render() {
+        var {id} = this.state;
         return (
             <div className="card">
                 <div className="card-header bg-warning">
@@ -36,7 +66,7 @@ class TaskForm extends Component {
                             className="fa fa-times-circle mr-3 target"
                             onClick={this.onCloseForm}
                         ></span>
-                        Thêm công việc
+                        { id !== ''? "Cập nhật công việc":"Thêm công việc"}
                     </h3>
                 </div>
                 <div className="card-body">

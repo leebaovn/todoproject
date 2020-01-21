@@ -8,7 +8,8 @@ class App extends Component {
     super();
     this.state = {
       tasks: [],
-      isDisplayForm: false
+      isDisplayForm: false,
+      editingTask: null
     }
   }
 
@@ -30,9 +31,17 @@ class App extends Component {
   }
 
   onOpenForm = () => {
-    this.setState({
-      isDisplayForm: !this.state.isDisplayForm
-    })
+    if(this.state.isDisplayForm && this.state.editingTask !== null){
+      this.setState({
+        isDisplayForm: true,
+        editingTask:null
+      });
+    }else{
+      this.setState({
+        isDisplayForm: !this.state.isDisplayForm,
+        editingTask:null
+      });
+    }
   }
 
   onCloseForm = () => {
@@ -42,13 +51,19 @@ class App extends Component {
   }
 
   onSubmit = (data) => {
-    data.id = this.generateId();  
+    
     var { tasks } = this.state;
-    tasks.push(data);
-    console.log(data.status);
+    if(data.id ===''){
+      data.id = this.generateId();
+      tasks.push(data);
+    }else{
+      var idx = this.findIndex(data.id);
+      tasks[idx] = data;
+    }
     this.setState({
       tasks: tasks,
-      isDisplayForm: false
+      isDisplayForm: false,
+      editingTask: null
     });
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
@@ -56,8 +71,8 @@ class App extends Component {
   onUpdateStatus = (id) => {
     var { tasks } = this.state;
     var idx = this.findIndex(id);
-    if (idx !== -1){
-      tasks[idx].state = !tasks[idx].state;
+    if (idx !== -1) {
+      tasks[idx].status = !tasks[idx].status;
       this.setState({
         tasks: tasks
       });
@@ -67,31 +82,59 @@ class App extends Component {
 
   findIndex = (id) => {
     var { tasks } = this.state;
-    var re=-1;
+    var re = -1;
     tasks.forEach((element, idx) => {
-      if (element.id === id){
+      if (element.id === id) {
         re = idx;
       }
     });
     return re;
   }
+  onDelete = (id) => {
+    var { tasks } = this.state;
+    var idx = this.findIndex(id);
+    if (idx !== -1) {
+      tasks.splice(idx,1);
+      this.setState({
+        tasks: tasks
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    this.onCloseForm();
+  }
+
+  onShowForm = () => {
+    this.setState({
+      isDisplayForm: true
+    })
+  }
+  onUpdate = (id) => {
+    var { tasks } = this.state;
+    var idx = this.findIndex(id);
+    var taskEdit = tasks[idx];
+    this.setState({
+      editingTask: taskEdit
+    });
+    this.onShowForm();
+
+  }
   render() {
-    var { tasks, isDisplayForm } = this.state;
-    var eleTaskForm = isDisplayForm ? <TaskForm onClose={this.onCloseForm} onSubmit={this.onSubmit} /> : '';
+    var { tasks, isDisplayForm, editingTask } = this.state;
+    var eleTaskForm = isDisplayForm ? <TaskForm 
+    onClose={this.onCloseForm}
+    onSubmit={this.onSubmit} 
+    task={editingTask}
+     /> : '';
     return (
       <div className="container">
         <div className="text-center">
           <h1>Quản lý công việc</h1>
         </div>
         <div className="row">
-          {/* Left 4 cols form */}
           <div className={isDisplayForm ? 'col-xs-4 col-sm-4 col-md-4 col-lg-4' : ''}>
             {eleTaskForm}
           </div>
-          { /* End left form */}
-          { /* 8 cols right */}
           <div className={isDisplayForm ? 'col-xs-8 col-sm-8 col-md-8 col-lg-8' : 'col-xs-12 col-sm-12 col-md-12 col-lg-12'}>
-            { /* btn Add todoItem */}
             <button
               type="button"
               className="btn btn-primary"
@@ -103,7 +146,12 @@ class App extends Component {
             <Control />
             <div className="row mt-2">
               <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <TaskList tasks={tasks} onUpdateStatus={this.onUpdateStatus} />
+                <TaskList
+                  tasks={tasks}
+                  onUpdateStatus={this.onUpdateStatus}
+                  onDelete={this.onDelete}
+                  onUpdate={this.onUpdate}
+                />
               </div>
             </div>
           </div>
@@ -112,5 +160,4 @@ class App extends Component {
     );
   }
 }
-
 export default App;
