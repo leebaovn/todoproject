@@ -1,0 +1,16 @@
+.label{
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.label-danger{
+    background-color: red;
+}
+
+.label-success{
+    background-color: yellowgreen;
+}
+
+.target{
+    cursor: pointer;
+}
