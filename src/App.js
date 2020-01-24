@@ -9,7 +9,11 @@ class App extends Component {
     this.state = {
       tasks: [],
       isDisplayForm: false,
-      editingTask: null
+      editingTask: null,
+      filter: {
+        name: '',
+        status: -1
+      }
     }
   }
 
@@ -31,15 +35,15 @@ class App extends Component {
   }
 
   onOpenForm = () => {
-    if(this.state.isDisplayForm && this.state.editingTask !== null){
+    if (this.state.isDisplayForm && this.state.editingTask !== null) {
       this.setState({
         isDisplayForm: true,
-        editingTask:null
+        editingTask: null
       });
-    }else{
+    } else {
       this.setState({
         isDisplayForm: !this.state.isDisplayForm,
-        editingTask:null
+        editingTask: null
       });
     }
   }
@@ -51,12 +55,12 @@ class App extends Component {
   }
 
   onSubmit = (data) => {
-    
+
     var { tasks } = this.state;
-    if(data.id ===''){
+    if (data.id === '') {
       data.id = this.generateId();
       tasks.push(data);
-    }else{
+    } else {
       var idx = this.findIndex(data.id);
       tasks[idx] = data;
     }
@@ -94,7 +98,7 @@ class App extends Component {
     var { tasks } = this.state;
     var idx = this.findIndex(id);
     if (idx !== -1) {
-      tasks.splice(idx,1);
+      tasks.splice(idx, 1);
       this.setState({
         tasks: tasks
       });
@@ -118,13 +122,40 @@ class App extends Component {
     this.onShowForm();
 
   }
+
+  onFilter = (name, status) => {
+    status = parseInt(status);
+    this.setState({
+      filter: {
+        name: name,
+        status: status
+      }
+    });
+
+  }
   render() {
-    var { tasks, isDisplayForm, editingTask } = this.state;
-    var eleTaskForm = isDisplayForm ? <TaskForm 
-    onClose={this.onCloseForm}
-    onSubmit={this.onSubmit} 
-    task={editingTask}
-     /> : '';
+    var { tasks, isDisplayForm, editingTask, filter } = this.state;
+    if (filter) {
+      if (filter.name) {
+        tasks = tasks.filter(task => {
+          return task.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1;
+        });
+      }
+
+      tasks = tasks.filter(task => {
+        if (filter.status === -1)
+          return task;
+        else
+          return task.status === (filter.status === 1 ? true : false);
+      })
+
+    }
+    var eleTaskForm = isDisplayForm ? <TaskForm
+      onClose={this.onCloseForm}
+      onSubmit={this.onSubmit}
+      task={editingTask}
+    /> : '';
+
     return (
       <div className="container">
         <div className="text-center">
@@ -151,6 +182,7 @@ class App extends Component {
                   onUpdateStatus={this.onUpdateStatus}
                   onDelete={this.onDelete}
                   onUpdate={this.onUpdate}
+                  onFilter={this.onFilter}
                 />
               </div>
             </div>
