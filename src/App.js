@@ -13,7 +13,8 @@ class App extends Component {
       filter: {
         name: '',
         status: -1
-      }
+      },
+      keyword: ''
     }
   }
 
@@ -131,10 +132,15 @@ class App extends Component {
         status: status
       }
     });
+  }
 
+  onSearch = (keyword) => {
+    this.setState({
+      keyword: keyword
+    });
   }
   render() {
-    var { tasks, isDisplayForm, editingTask, filter } = this.state;
+    var { tasks, isDisplayForm, editingTask, filter, keyword } = this.state;
     if (filter) {
       if (filter.name) {
         tasks = tasks.filter(task => {
@@ -156,6 +162,13 @@ class App extends Component {
       task={editingTask}
     /> : '';
 
+    if(keyword){
+      tasks = tasks.filter(task => {
+        return task.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+      });
+    }
+
+
     return (
       <div className="container">
         <div className="text-center">
@@ -173,8 +186,9 @@ class App extends Component {
             >
               <i className="fa fa-plus mr-2"></i>Thêm công việc
           </button>
-
-            <Control />
+            <Control 
+              onSearch = {this.onSearch}
+            />
             <div className="row mt-2">
               <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <TaskList
